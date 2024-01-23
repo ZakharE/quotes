@@ -14,11 +14,15 @@ type RefreshTaskRepository interface {
 }
 
 type QuotesService struct {
-	client CurrencyQuotesClient
+	client                CurrencyQuotesClient
+	refreshTaskRepository RefreshTaskRepository
 }
 
-func NewQuotesService(client CurrencyQuotesClient) *QuotesService {
-	return &QuotesService{client: client}
+func NewQuotesService(client CurrencyQuotesClient, refreshTaskRepository RefreshTaskRepository) *QuotesService {
+	return &QuotesService{
+		client:                client,
+		refreshTaskRepository: refreshTaskRepository,
+	}
 }
 
 func (qs QuotesService) CreateRefreshTask(ctx context.Context, pair models.CurrencyPair) (models.Quote, error) {
