@@ -10,7 +10,7 @@ output-options:
   
 compatibility:
   apply-chi-middleware-first-to-last: true
-output: ./internal/quotes/http/server.gen.go
+output: ./internal/quotes/server/server.gen.go
 
 import-mapping:
   ./models/models.yaml: "plata_card_quotes/internal/quotes/models"

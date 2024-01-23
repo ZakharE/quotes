@@ -35,3 +35,7 @@ components:
     Currency:
       type: string
       enum: [ EUR, USD, MXN ]
+      x-enum-varnames:
+        - currency_eur
+        - currency_usd
+        - currency_mxn

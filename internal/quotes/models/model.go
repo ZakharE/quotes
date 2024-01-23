@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type Quote struct {
 	Pair  CurrencyPair
@@ -11,4 +14,11 @@ type Quote struct {
 type CurrencyPair struct {
 	From Currency
 	To   Currency
+}
+
+func (rt NewRefreshTask) ToCurrencyPair() CurrencyPair {
+	return CurrencyPair{
+		From: Currency(strings.ToLower(string(rt.From))),
+		To:   Currency(strings.ToLower(string(rt.To))),
+	}
 }

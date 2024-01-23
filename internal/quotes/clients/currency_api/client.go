@@ -1,6 +1,7 @@
 package currency_api
 
 import (
+	"context"
 	"errors"
 	"github.com/go-resty/resty/v2"
 	"log/slog"
@@ -29,10 +30,9 @@ func NewCurrencyQuotesClient(logger *slog.Logger) *currenciesClient {
 	}
 }
 
-func (c currenciesClient) GetQuote(pair models.CurrencyPair) (models.Quote, error) {
+func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair) (models.Quote, error) {
 	url := "/currency-api@1/latest/currencies/{from}/{to}.json"
 	type resp map[string]interface{}
-
 	response, err := c.client.R().
 		SetHeaders(map[string]string{
 			"Content-Type": "application/json",

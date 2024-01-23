@@ -17,9 +17,9 @@ import (
 
 // Defines values for Currency.
 const (
-	EUR Currency = "EUR"
-	MXN Currency = "MXN"
-	USD Currency = "USD"
+	CurrencyEur Currency = "EUR"
+	CurrencyMxn Currency = "MXN"
+	CurrencyUsd Currency = "USD"
 )
 
 // Currency defines model for Currency.
@@ -45,11 +45,11 @@ type RefreshTask struct {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/4yQQUsDMRCF/8vTY2BBb7lqj/ZQLQjiIe7O7kabTJzMIqXsf5dE6UIr0tMMycuXj3dA",
-	"yyFxpKgZ9oDcjhRcXe8mEYrtvuwUpwD7gtV2A4Pt4z0MHp7XeDXQfSJYZBUfB8wGKxGW8igJJxL1VHEt",
-	"d1RmzxKcwsJHvb3BEeCj0kBSCIFydkNNn9BnA6HPyQt1Racyl/xiw2/v1GphrelrQ71QHp9c/jjX6oVD",
-	"mddCPSyumqWP5reM5tjEbKB8efrEtn5VCX+J/mvpu4uqm8+45cjHnmHjtNsZcKLokocFDJLTMf/czN8B",
-	"AAD//zbnV6cJAgAA",
+	"H4sIAAAAAAAC/4yQQU86MRDFv8v7/48lJHrrVTnKASUxMcTU3Vm2Sqd12lUI6Xc3rYRVMYbTzLSvb359",
+	"ezTeBc/EKULvEZuenKnt1SBC3OxKTzw46AfMlgsoLG+voXBzP8dKIe0CQSMmsbyGwnZSxJM3I2wcxfKq",
+	"OTg90iBQ4zjE9uvotoxVVpiJeClbg/hAkixVnsa3VGrnxZkEDcvp8gJHAsuJ1iTICo5iNOuq/o6Xs4LQ",
+	"62CF2kpWPEf9+B3/9ExNKl5zel9QJxT7OxNfTrE68a7U/0IdNP5Nx0CnhzSnxyizQvLnq3/Q1lXV4TfQ",
+	"Pylte1Z0+cS3HFnuPDQPm42CD8QmWGhAIZjUx8+b/BEAAP//lwYyI0oCAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
