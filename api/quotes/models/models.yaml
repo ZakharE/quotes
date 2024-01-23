@@ -1,0 +1,37 @@
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+
+    NewRefreshTask:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          $ref: '#/components/schemas/Currency'
+        to:
+          $ref: '#/components/schemas/Currency'
+
+    RefreshTask:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+
+
+    Currency:
+      type: string
+      enum: [ EUR, USD, MXN ]

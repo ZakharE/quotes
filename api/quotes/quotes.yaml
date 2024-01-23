@@ -1,0 +1,45 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Quotes
+  description: Test assignment
+  contact:
+    name: Zakhar Eliseev
+    url: http://github.com/ZakharE
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  "/quote/":
+    post:
+      description: Create task for quote refreshing
+      operationId: refreshQuote
+      requestBody:
+        description: Currency pair which to refresh
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models/models.yaml#/components/schemas/NewRefreshTask'
+
+      responses:
+        '200':
+          description: task response
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/RefreshTask'
+
+        '404':
+          description: no such task response
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
