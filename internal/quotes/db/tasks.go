@@ -2,6 +2,9 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"log/slog"
 	"plata_card_quotes/internal/quotes/models"
@@ -17,16 +20,24 @@ func NewTaskStorage(conn *sqlx.DB, logger *slog.Logger) *taskStorage {
 }
 
 func (t taskStorage) Save(ctx context.Context, pair models.CurrencyPair) (int64, error) {
-	result, err := t.conn.ExecContext(ctx, "INSERT INTO refresh_task(from, to) values($1, $2)", pair.From, pair.To)
+	var id int64
+	err := t.conn.QueryRowContext(ctx, "INSERT INTO refresh_task(base, counter) values($1, $2) RETURNING id;", pair.Base, pair.Counter).Scan(&id)
 	if err != nil {
-		//TODO
-		panic("implement wrapping")
-	}
-	id, err := result.LastInsertId()
-	if err != nil {
-
-		//TODO
-		panic("implement wrapping")
+		return 0, fmt.Errorf("cannot create task: %w", errors.Join(models.ErrInsertErr, err))
 	}
 	return id, nil
+}
+
+func (t taskStorage) Get(ctx context.Context, id int64) (models.TaskDTO, error) {
+	result := models.TaskDTO{}
+	row := t.conn.QueryRowContext(ctx, "SELECT  base, counter, ratio, time, finished_at FROM refresh_task WHERE id = $1;", id)
+	err := row.Scan(&result.Base, &result.Counter, &result.Ratio, &result.Time, &result.TimeFinished)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return models.TaskDTO{}, fmt.Errorf("cannot get quote for task: %w", models.ErrNoRows)
+	case err != nil:
+		return models.TaskDTO{}, err
+	}
+
+	return result, nil
 }

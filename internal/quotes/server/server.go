@@ -58,16 +58,43 @@ func (qs *quotesServer) Start() {
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {
 	body := request.Body
-	if body.From == body.To {
+	if body.Base == body.Counter {
 		return RefreshQuotedefaultJSONResponse{
 			Body:       models.Error{Message: "Fields 'from' and 'to must differ!"},
 			StatusCode: 400,
 		}, nil
 	}
-	quote, err := qs.quotesService.CreateRefreshTask(ctx, body.ToCurrencyPair())
-	qs.logger.Info("quote", "quote", quote)
+	id, err := qs.quotesService.CreateRefreshTask(ctx, body.ToCurrencyPair())
 	if err != nil {
-		return nil, err
+		return RefreshQuotedefaultJSONResponse{models.Error{
+			Message: "Something went wrong",
+		}, 500}, nil
 	}
-	return RefreshQuote200JSONResponse(models.RefreshTask{}), nil
+	return RefreshQuote200JSONResponse(models.RefreshTask{Id: &id}), nil
+}
+
+func (qs *quotesServer) GetLastQuote(ctx context.Context, request GetLastQuoteRequestObject) (GetLastQuoteResponseObject, error) {
+	pair := models.CurrencyPair{
+		Base:    request.Params.BaseCurrency,
+		Counter: request.Params.CounterCurrency,
+	}
+	quote, err := qs.quotesService.GetLastQuote(ctx, pair)
+	if errors.Is(err, models.ErrNoRows) {
+		return GetLastQuote404JSONResponse(models.Error{Message: "no task with such id"}), nil
+	}
+	if err != nil {
+		return GetLastQuotedefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
+	}
+	return GetLastQuote200JSONResponse(quote), nil
+}
+
+func (qs *quotesServer) GetTask(ctx context.Context, request GetTaskRequestObject) (GetTaskResponseObject, error) {
+	task, err := qs.quotesService.GetTask(ctx, request.Id)
+	if errors.Is(err, models.ErrNoRows) {
+		return GetTask404JSONResponse(models.Error{Message: "no task with such id"}), nil
+	}
+	if err != nil {
+		return GetTaskdefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
+	}
+	return GetTask200JSONResponse(task.ToQuote()), nil
 }

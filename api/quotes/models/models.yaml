@@ -3,12 +3,8 @@ components:
     Error:
       type: object
       required:
-        - code
         - message
       properties:
-        code:
-          type: integer
-          format: int32
         message:
           type: string
 
@@ -16,12 +12,12 @@ components:
     NewRefreshTask:
       type: object
       required:
-        - from
-        - to
+        - base
+        - counter
       properties:
-        from:
+        base:
           $ref: '#/components/schemas/Currency'
-        to:
+        counter:
           $ref: '#/components/schemas/Currency'
 
     RefreshTask:
@@ -29,8 +25,18 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
 
+    Quote:
+      type: object
+      required:
+        - ratio
+        - time
+      properties:
+        ratio:
+          x-go-type: float64
+        time:
+          type: string
 
     Currency:
       type: string

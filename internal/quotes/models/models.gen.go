@@ -27,29 +27,35 @@ type Currency string
 
 // Error defines model for Error.
 type Error struct {
-	Code    int32  `json:"code"`
 	Message string `json:"message"`
 }
 
 // NewRefreshTask defines model for NewRefreshTask.
 type NewRefreshTask struct {
-	From Currency `json:"from"`
-	To   Currency `json:"to"`
+	Base    Currency `json:"base"`
+	Counter Currency `json:"counter"`
+}
+
+// Quote defines model for Quote.
+type Quote struct {
+	Ratio float64 `json:"ratio"`
+	Time  string  `json:"time"`
 }
 
 // RefreshTask defines model for RefreshTask.
 type RefreshTask struct {
-	Id *int32 `json:"id,omitempty"`
+	Id *int64 `json:"id,omitempty"`
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/4yQQU86MRDFv8v7/48lJHrrVTnKASUxMcTU3Vm2Sqd12lUI6Xc3rYRVMYbTzLSvb359",
-	"ezTeBc/EKULvEZuenKnt1SBC3OxKTzw46AfMlgsoLG+voXBzP8dKIe0CQSMmsbyGwnZSxJM3I2wcxfKq",
-	"OTg90iBQ4zjE9uvotoxVVpiJeClbg/hAkixVnsa3VGrnxZkEDcvp8gJHAsuJ1iTICo5iNOuq/o6Xs4LQ",
-	"62CF2kpWPEf9+B3/9ExNKl5zel9QJxT7OxNfTrE68a7U/0IdNP5Nx0CnhzSnxyizQvLnq3/Q1lXV4TfQ",
-	"Pylte1Z0+cS3HFnuPDQPm42CD8QmWGhAIZjUx8+b/BEAAP//lwYyI0oCAAA=",
+	"H4sIAAAAAAAC/4yQz0/6QBDF/5f3/R634WI89KocJRElMTHELGVaVtkfzs4qhPR/N1sqVSCGSzPTnfc+",
+	"L2+HytvgHTmJKHeI1Yqs7sabxEyu2uaZXLIonzGeTaEwe7iFwt3TBHMF2QZCiShsXAOFTZGPiw/NTluK",
+	"WVX1Ti+UGGpYU1z+XO3GYd4qjJk9Z2pgH4jFUJfHUoy6oTz+ZratAtN7MkzLjPs+HML5xStVglZhQp9T",
+	"qpni6lHHt1PIQseO8J+pRol/o6GeUd/N6FBMq1D55IT4cslR1o432JyLfJ+80GlS1mJ8HjZF44teVa+9",
+	"luurLBNjL+hq79Jfn6P/2ZZZ5m/t2WpBCeMy+2BinFBD3DGPfPMv42qP0qX1WsEHcjoYlIBC0LKK+5f2",
+	"KwAA///pZTDkoAIAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

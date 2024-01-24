@@ -30,24 +30,26 @@ func NewCurrencyQuotesClient(logger *slog.Logger) *currenciesClient {
 	}
 }
 
-func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair) (models.Quote, error) {
-	url := "/currency-api@1/latest/currencies/{from}/{to}.json"
+func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair) (models.TaskDTO, error) {
+	url := "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{from}/{to}.json"
 	type resp map[string]interface{}
-	response, err := c.client.R().
+	response, err := c.client.
+		R().
+		SetContext(ctx).
 		SetHeaders(map[string]string{
 			"Content-Type": "application/json",
 		},
 		).
 		SetResult(&resp{}).
 		SetPathParams(map[string]string{
-			"from": string(pair.From),
-			"to":   string(pair.To),
+			"from": string(pair.Base),
+			"to":   string(pair.Counter),
 		}).
 		Get(url)
 
 	if err != nil {
 		c.logger.Error("cannot get quote", "error", err)
-		return models.Quote{}, err
+		return models.TaskDTO{}, err
 	}
 
 	statusCode := response.StatusCode()
@@ -61,11 +63,11 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 				"error", err,
 				"resp", result,
 			)
-			return models.Quote{}, errors.New("cannot parse response")
+			return models.TaskDTO{}, errors.New("cannot parse response")
 		}
 		return quote, nil
 	case http.StatusNotFound:
-		return models.Quote{}, ErrNotFound
+		return models.TaskDTO{}, ErrNotFound
 	default:
 		c.logger.Warn(
 			"cannot parse response",
@@ -73,24 +75,25 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 			"status_code", statusCode,
 			"body", response.RawResponse,
 		)
-		return models.Quote{}, ErrNotSupportedStatusCode
+		return models.TaskDTO{}, ErrNotSupportedStatusCode
 	}
 }
 
-func (c currenciesClient) parseResponse(pair models.CurrencyPair, response map[string]interface{}) (models.Quote, error) {
+func (c currenciesClient) parseResponse(pair models.CurrencyPair, response map[string]interface{}) (models.TaskDTO, error) {
 	date, err := time.Parse(time.DateOnly, response["date"].(string))
 
 	if err != nil {
-		return models.Quote{}, err
+		return models.TaskDTO{}, models.ErrParse
 	}
-	val := response[string(pair.To)]
-	if val == nil {
-		return models.Quote{}, err
+	val, ok := response[string(pair.Counter)]
+
+	if !ok {
+		return models.TaskDTO{}, models.ErrParse
 	}
 
-	return models.Quote{
-		Pair:  pair,
-		Date:  date,
-		Value: val.(float64),
+	return models.TaskDTO{
+		CurrencyPair: pair,
+		Time:         &date,
+		Ratio:        val.(*float64),
 	}, err
 }

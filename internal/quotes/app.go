@@ -51,12 +51,14 @@ func main() {
 		panic(err)
 	}
 
-	storage := db.NewTaskStorage(conn, logger)
+	taskStorage := db.NewTaskStorage(conn, logger)
+	quoteStorage := db.NewQuoteStorage(conn, logger)
 
 	client := currency_api.NewCurrencyQuotesClient(logger)
 	srv := server.NewQuotesServer(logger,
 		chi.NewRouter(),
-		service.NewQuotesService(client, storage),
+		service.NewQuotesService(logger, client, taskStorage, quoteStorage),
 	)
+
 	srv.Start()
 }

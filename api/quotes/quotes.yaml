@@ -10,7 +10,80 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-  "/quote/":
+  "/quote":
+    get:
+      description: returns last value for quote
+      operationId: getLastQuote
+      parameters:
+        - name: baseCurrency
+          in: query
+          description: base currency
+          required: true
+          schema:
+            $ref: './models/models.yaml#/components/schemas/Currency'
+        - name: counterCurrency
+          in: query
+          description: counter currency
+          required: true
+          schema:
+            $ref: './models/models.yaml#/components/schemas/Currency'
+      responses:
+        '200':
+          description: current quote value with time at which this quote is valid
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Quote'
+        '404':
+          description: returns if no data available at the moment, i.e no refresh task were executed
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+        'default':
+          description: error with description
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+
+
+  "/quote/task/{id}":
+    get:
+      description: returns a task
+      operationId: getTask
+      parameters:
+        - name: id
+          in: path
+          description: ID of task to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: task response
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Quote'
+        '404':
+          description: returns if task with specified id doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+
+        'default':
+          description: error with description
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+
+
+
+  "/quote/task":
     post:
       description: Create task for quote refreshing
       operationId: refreshQuote
@@ -21,7 +94,6 @@ paths:
           application/json:
             schema:
               $ref: './models/models.yaml#/components/schemas/NewRefreshTask'
-
       responses:
         '200':
           description: task response
@@ -29,13 +101,12 @@ paths:
             application/json:
               schema:
                 $ref: './models/models.yaml#/components/schemas/RefreshTask'
-
-        '404':
-          description: no such task response
+        '400':
+          description: error if currency are in the 'base' and in the 'counter' are the same
           content:
             application/json:
               schema:
-                $ref: './models/models.yaml#/components/schemas/Error'
+                $ref: './models/models.yaml#/components/schemas/RefreshTask'
 
         default:
           description: unexpected error
@@ -43,3 +114,6 @@ paths:
             application/json:
               schema:
                 $ref: './models/models.yaml#/components/schemas/Error'
+
+
+                ## big int vs uuid
