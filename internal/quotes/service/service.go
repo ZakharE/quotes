@@ -10,7 +10,7 @@ type CurrencyQuotesClient interface {
 }
 
 type RefreshTaskRepository interface {
-	Save(ctx context.Context, pair models.CurrencyPair) (int, error)
+	Save(ctx context.Context, pair models.CurrencyPair) (int64, error)
 }
 
 type QuotesService struct {
