@@ -17,8 +17,10 @@ components:
       properties:
         base:
           type: string
+          pattern: '^[a-zA-Z]{3}$'
         counter:
           type: string
+          pattern: '^[a-zA-Z]{3}$'
 
     RefreshTask:
       type: object

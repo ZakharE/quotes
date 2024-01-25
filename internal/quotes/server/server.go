@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"plata_card_quotes/internal/quotes/models"
 	"plata_card_quotes/internal/quotes/service"
@@ -59,11 +60,14 @@ func (qs *quotesServer) Start() {
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {
 	body := request.Body
+	if !models.IsCurrencySupported(body.Base) {
+		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", body.Base)}), nil
+	}
+	if !models.IsCurrencySupported(body.Counter) {
+		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", body.Counter)}), nil
+	}
 	if body.Base == body.Counter {
-		return RefreshQuotedefaultJSONResponse{
-			Body:       models.Error{Message: "Fields 'from' and 'to must differ!"},
-			StatusCode: 400,
-		}, nil
+		return RefreshQuote400JSONResponse(models.Error{Message: "Fields 'from' and 'to must differ!"}), nil
 	}
 	id, err := qs.quotesService.CreateRefreshTask(ctx, body.ToCurrencyPair())
 	if err != nil {

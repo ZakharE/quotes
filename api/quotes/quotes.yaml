@@ -112,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './models/models.yaml#/components/schemas/RefreshTask'
+                $ref: './models/models.yaml#/components/schemas/Error'
 
         default:
           description: unexpected error
@@ -120,6 +120,3 @@ paths:
             application/json:
               schema:
                 $ref: './models/models.yaml#/components/schemas/Error'
-
-
-                ## big int vs uuid

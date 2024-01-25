@@ -1,5 +1,3 @@
-DB_MIGRATION_PATH='./sql/quotes'
-
 start_app:
 	docker-compose up . -d
 	goose migrate up
@@ -10,4 +8,4 @@ generate-server:
 generate-models:
 	oapi-codegen  -config ./api/quotes/models/models-cfg.yaml ./api/quotes/models/models.yaml
 
-
+generate-all: generate-server generate-server

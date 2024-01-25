@@ -41,11 +41,11 @@ type RefreshTask struct {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/4yQP0/EMAzFv4vnhAkxZIYVCXQbYnBbNw20cXBcUXTqd0dpC4i7Cm6Jnvzn9/xyhJqH",
-	"xJGiZnBHyHVHAy7yToSliCScSDTQUh4oZ/RUpH4kAgdZJUQP82xA6G0MQg24p+/BZ/M1yNUL1QqzgXt6",
-	"f6RWKHcHzK/nJhXmPQcDNY9RSf53Xwg/83tHPIysdIuK5/6CGriIyXq222bbM+rNNRiYLGMKtuaGPEVL",
-	"kwpaRb/sNhW4DVCO0jDQKanUrg6lcQlrIcynAVeHjb8X788PDk15W5YBFRyEuAbbICEqeZL1/t/cUgqx",
-	"ZXBx7HsDnChiCuAADCTULq+d+TMAAP//RZ7dOVoCAAA=",
+	"H4sIAAAAAAAC/5SRQU/7MAzFv4v1Pyb/C4hDbkhwRQLtxDQkr3W7wBoHxxWDqt8dJS0gugnBJXpy7N97",
+	"lgeouIscKGgCN0CqdtRhkdciLFlE4Uiinkq5o5SwpSz1NRI4SCo+tDCOBoSeey9Ug1t/Nm7MRyNvH6lS",
+	"GA3c0MsdNUJpt8L0dGyyxVQcIqqSBHDwsEb7dmnvN8PZ+A/M0ttAxX1Qkj9NLRIX1y/SqeC3PStdoeJx",
+	"ZkH1nMXBtmznyWbPqBfnYOBgGaO3FdfUUrB0UEGr2JbZegtuBuRQ6jtaknLt/yp//IZVCONywclh5p9a",
+	"78ej+Dq/DUuHCg58mBabIT4otSRT/u/cXPKhYXCh3+8NcKSA0YMDMPlYuzT9jO8BAAD//6tZ0RyOAgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

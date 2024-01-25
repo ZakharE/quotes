@@ -7,7 +7,7 @@ import (
 )
 
 type CurrencyQuotesClient interface {
-	GetQuote(ctx context.Context, pair models.CurrencyPair) (models.TaskDTO, error)
+	GetQuote(ctx context.Context, pair models.CurrencyPair) (models.Quote, error)
 }
 
 type QuoteRepository interface {
@@ -59,7 +59,7 @@ func (qs QuotesService) GetTask(ctx context.Context, id int64) (models.TaskDTO, 
 func (qs QuotesService) GetLastQuote(ctx context.Context, pair models.CurrencyPair) (models.QuoteData, error) {
 	quote, err := qs.quoteRepository.Get(ctx, pair)
 	if err != nil {
-		qs.logger.Error("cannot retrieve task", "error", err)
+		qs.logger.Error("cannot retrieve last quote", "error", err)
 	}
 	return quote, err
 }
