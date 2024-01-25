@@ -94,8 +94,11 @@ func (qs *quotesServer) GetTask(ctx context.Context, request GetTaskRequestObjec
 	if errors.Is(err, models.ErrNoRows) {
 		return GetTask404JSONResponse(models.Error{Message: "no task with such id"}), nil
 	}
+	if !task.IsFinished {
+		return GetTask425JSONResponse(models.Error{Message: "task still in progress. try again later"}), nil
+	}
 	if err != nil {
 		return GetTaskdefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
 	}
-	return GetTask200JSONResponse(task.ToQuote()), nil
+	return GetTask200JSONResponse(task.ToQuoteData()), nil
 }

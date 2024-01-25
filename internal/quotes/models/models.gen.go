@@ -11,19 +11,10 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
-
-// Defines values for Currency.
-const (
-	CurrencyEur Currency = "EUR"
-	CurrencyMxn Currency = "MXN"
-	CurrencyUsd Currency = "USD"
-)
-
-// Currency defines model for Currency.
-type Currency string
 
 // Error defines model for Error.
 type Error struct {
@@ -32,14 +23,14 @@ type Error struct {
 
 // NewRefreshTask defines model for NewRefreshTask.
 type NewRefreshTask struct {
-	Base    Currency `json:"base"`
-	Counter Currency `json:"counter"`
+	Base    string `json:"base"`
+	Counter string `json:"counter"`
 }
 
-// Quote defines model for Quote.
-type Quote struct {
-	Ratio float64 `json:"ratio"`
-	Time  string  `json:"time"`
+// QuoteData defines model for QuoteData.
+type QuoteData struct {
+	Ratio float64   `db:"ratio" json:"ratio"`
+	Time  time.Time `db:"time" json:"time"`
 }
 
 // RefreshTask defines model for RefreshTask.
@@ -50,12 +41,11 @@ type RefreshTask struct {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/4yQz0/6QBDF/5f3/R634WI89KocJRElMTHELGVaVtkfzs4qhPR/N1sqVSCGSzPTnfc+",
-	"L2+HytvgHTmJKHeI1Yqs7sabxEyu2uaZXLIonzGeTaEwe7iFwt3TBHMF2QZCiShsXAOFTZGPiw/NTluK",
-	"WVX1Ti+UGGpYU1z+XO3GYd4qjJk9Z2pgH4jFUJfHUoy6oTz+ZratAtN7MkzLjPs+HML5xStVglZhQp9T",
-	"qpni6lHHt1PIQseO8J+pRol/o6GeUd/N6FBMq1D55IT4cslR1o432JyLfJ+80GlS1mJ8HjZF44teVa+9",
-	"luurLBNjL+hq79Jfn6P/2ZZZ5m/t2WpBCeMy+2BinFBD3DGPfPMv42qP0qX1WsEHcjoYlIBC0LKK+5f2",
-	"KwAA///pZTDkoAIAAA==",
+	"H4sIAAAAAAAC/4yQP0/EMAzFv4vnhAkxZIYVCXQbYnBbNw20cXBcUXTqd0dpC4i7Cm6Jnvzn9/xyhJqH",
+	"xJGiZnBHyHVHAy7yToSliCScSDTQUh4oZ/RUpH4kAgdZJUQP82xA6G0MQg24p+/BZ/M1yNUL1QqzgXt6",
+	"f6RWKHcHzK/nJhXmPQcDNY9RSf53Xwg/83tHPIysdIuK5/6CGriIyXq222bbM+rNNRiYLGMKtuaGPEVL",
+	"kwpaRb/sNhW4DVCO0jDQKanUrg6lcQlrIcynAVeHjb8X788PDk15W5YBFRyEuAbbICEqeZL1/t/cUgqx",
+	"ZXBx7HsDnChiCuAADCTULq+d+TMAAP//RZ7dOVoCAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

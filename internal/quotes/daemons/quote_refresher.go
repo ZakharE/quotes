@@ -10,11 +10,11 @@ import (
 
 type RefreshTaskRepository interface {
 	GetUnprocessed(ctx context.Context, limit int) ([]models.TaskDTO, error)
-	SetProcessedAndUpdated(ctx context.Context, task models.TaskDTO, taskIds []int64) error
+	SetProcessedAndUpdated(ctx context.Context, task models.Quote, taskIds []int64) error
 }
 
 type CurrencyQuotesClient interface {
-	GetQuote(ctx context.Context, pair models.CurrencyPair) (models.TaskDTO, error)
+	GetQuote(ctx context.Context, pair models.CurrencyPair) (models.Quote, error)
 }
 
 type notificationEventDaemon struct {

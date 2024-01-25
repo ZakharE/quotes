@@ -30,7 +30,7 @@ func NewCurrencyQuotesClient(logger *slog.Logger) *currenciesClient {
 	}
 }
 
-func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair) (models.TaskDTO, error) {
+func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair) (models.Quote, error) {
 	url := "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{from}/{to}.json"
 	type resp map[string]interface{}
 	response, err := c.client.
@@ -49,7 +49,7 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 
 	if err != nil {
 		c.logger.Error("cannot get quote", "error", err)
-		return models.TaskDTO{}, err
+		return models.Quote{}, err
 	}
 
 	statusCode := response.StatusCode()
@@ -63,11 +63,11 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 				"error", err,
 				"resp", result,
 			)
-			return models.TaskDTO{}, errors.New("cannot parse response")
+			return models.Quote{}, errors.New("cannot parse response")
 		}
 		return quote, nil
 	case http.StatusNotFound:
-		return models.TaskDTO{}, ErrNotFound
+		return models.Quote{}, ErrNotFound
 	default:
 		c.logger.Warn(
 			"cannot parse response",
@@ -75,25 +75,28 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 			"status_code", statusCode,
 			"body", response.RawResponse,
 		)
-		return models.TaskDTO{}, ErrNotSupportedStatusCode
+		return models.Quote{}, ErrNotSupportedStatusCode
 	}
 }
 
-func (c currenciesClient) parseResponse(pair models.CurrencyPair, response map[string]interface{}) (models.TaskDTO, error) {
+func (c currenciesClient) parseResponse(pair models.CurrencyPair, response map[string]interface{}) (models.Quote, error) {
 	date, err := time.Parse(time.DateOnly, response["date"].(string))
 
 	if err != nil {
-		return models.TaskDTO{}, models.ErrParse
+		return models.Quote{}, models.ErrParse
 	}
-	val, ok := response[string(pair.Counter)]
+	val, ok := response[pair.Counter]
 
 	if !ok {
-		return models.TaskDTO{}, models.ErrParse
+		return models.Quote{}, models.ErrParse
 	}
 	ratio := val.(float64)
-	return models.TaskDTO{
+
+	return models.Quote{
 		CurrencyPair: pair,
-		Time:         &date,
-		Ratio:        &ratio,
+		QuoteData: models.QuoteData{
+			Time:  date,
+			Ratio: ratio,
+		},
 	}, err
 }

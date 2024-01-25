@@ -11,12 +11,18 @@ type TaskDTO struct {
 	Time         *time.Time `db:"time"`
 	Ratio        *float64   `db:"ratio"`
 	TimeFinished *time.Time `db:"time_finished"`
+	IsFinished   bool       `db:"is_finished"`
 }
 
-func (t TaskDTO) ToQuote() Quote {
-	quote := Quote{}
+type Quote struct {
+	CurrencyPair
+	QuoteData
+}
+
+func (t TaskDTO) ToQuoteData() QuoteData {
+	quote := QuoteData{}
 	if t.Time != nil {
-		quote.Time = t.Time.String()
+		quote.Time = *t.Time
 	}
 	if t.Ratio != nil {
 		quote.Ratio = *t.Ratio
@@ -25,13 +31,13 @@ func (t TaskDTO) ToQuote() Quote {
 }
 
 type CurrencyPair struct {
-	Base    Currency `db:"base"`
-	Counter Currency `db:"counter"`
+	Base    string `db:"base"`
+	Counter string `db:"counter"`
 }
 
 func (rt NewRefreshTask) ToCurrencyPair() CurrencyPair {
 	return CurrencyPair{
-		Base:    Currency(strings.ToLower(string(rt.Base))),
-		Counter: Currency(strings.ToLower(string(rt.Counter))),
+		Base:    strings.ToLower(rt.Base),
+		Counter: strings.ToLower(rt.Counter),
 	}
 }

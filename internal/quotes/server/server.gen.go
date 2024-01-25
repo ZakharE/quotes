@@ -26,10 +26,10 @@ import (
 // GetLastQuoteParams defines parameters for GetLastQuote.
 type GetLastQuoteParams struct {
 	// BaseCurrency base currency
-	BaseCurrency externalRef0.Currency `form:"baseCurrency" json:"baseCurrency"`
+	BaseCurrency string `form:"baseCurrency" json:"baseCurrency"`
 
 	// CounterCurrency counter currency
-	CounterCurrency externalRef0.Currency `form:"counterCurrency" json:"counterCurrency"`
+	CounterCurrency string `form:"counterCurrency" json:"counterCurrency"`
 }
 
 // RefreshQuoteJSONRequestBody defines body for RefreshQuote for application/json ContentType.
@@ -301,7 +301,7 @@ type GetLastQuoteResponseObject interface {
 	VisitGetLastQuoteResponse(w http.ResponseWriter) error
 }
 
-type GetLastQuote200JSONResponse externalRef0.Quote
+type GetLastQuote200JSONResponse externalRef0.QuoteData
 
 func (response GetLastQuote200JSONResponse) VisitGetLastQuoteResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -377,7 +377,7 @@ type GetTaskResponseObject interface {
 	VisitGetTaskResponse(w http.ResponseWriter) error
 }
 
-type GetTask200JSONResponse externalRef0.Quote
+type GetTask200JSONResponse externalRef0.QuoteData
 
 func (response GetTask200JSONResponse) VisitGetTaskResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -391,6 +391,15 @@ type GetTask404JSONResponse externalRef0.Error
 func (response GetTask404JSONResponse) VisitGetTaskResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetTask425JSONResponse externalRef0.Error
+
+func (response GetTask425JSONResponse) VisitGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(425)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -535,21 +544,21 @@ func (sh *strictHandler) GetTask(w http.ResponseWriter, r *http.Request, id int6
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xW32vjRhD+V5ZpIS+K5KahD3prc6YEroG7y0FpCWUijay9SLvK7sh2MPrfy+xK9tkx",
-	"SQq59F7Mand+fDvzzbfeQGHbzhoy7CHfgC9qajEsL3rnyBQPsibTt5D/DfPPHyGBz5/eQQJ//HkFNwnw",
-	"Q0eQg2enzQISWJ+K8ekSncGWvHgVY6R/qHeQ7D57X3792a4N3AwJzJ2zTrJ2znbkWFPA05L3uCBZ7ucc",
-	"hgQc3ffaUSnpJsMdOHv7hQqGIYErWn2kypGvr9HfPU5yiz5k+NFRBTn8kO3Kk421ybaFGRIobG+Y3Mtd",
-	"DrCGfLswxyB/6C3TY6QOWVtZrE8X9nT0qhqL/Mu5uLFuX1CrGGW0Ppb9yWrpUn4r61pkyEEbyb0Nog3T",
-	"glzIeRBXtrSpAv7CGsaCZSmMgRz+wrsanZo32hMtIYHeNZBDzdzlWbbQXPe3aWHbLBrOBWdJvnC6Y20N",
-	"5HBNnhV6rxemJcOQQKMLMrG3Y5ZfOyxqUmfpbC+Dz7NstVqlGI5T6xbZ6Ouz95cX86tP89OzdJbW3Dax",
-	"ztxIuNAmDwksyfmI4qd0ls7ExnZksNOQw89hK4EOuQ4lzO6n9i4o1GD/Io64d8arBj2rJTY9qco6FZ1C",
-	"4NBBc1lCDr8Tv0fPH8bDDh22xORkCA8DC/HUNHog3YAc7nty8jFWSGwudiY73rDrKRm14r9Q/xDESPvn",
-	"cIxmrwnlRmL4zkpbxe1sNpu4KHzJN4Bd1+giFDf74gXu5oVpYv0Dxw+uG/Jz7N7YzZXmWsn0KWS1qnVR",
-	"K661H220FzNdConOZ+evBjFK7BGIE990pYxVJTIqXKJu8LYJCLkm1VqZqUTplMTIRYVQjP5OrciRojUV",
-	"PVMZ57LCvuFvj5zkIJbz64MhmMYpy3hSMeuPzNqFI2SK99gO2XS9+Ljtz9uojdO8CSnJ82+2fHi16x68",
-	"V0fuPZFadajdxKBtVx7NyvANif8M0lDYKXlk9JvljuzQ1VZqFDpS2gRCn4jQnSg05XZnlJyTYCY7XqTo",
-	"LfncG1p3VDCViiabfSZnG10Oz74cGAh97K24jvtPPhOX75St4kiwVRVxUU8iLU/YTqN1+aQsP/8f4X9R",
-	"5COUfFuRjaIpouU7KnSlqVS6VKUlb05Y0Vp7/l5kdBj+DQAA//8vHOHILgwAAA==",
+	"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",
+	"8n8x+e32nwAAAP//+H4AlwcMAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

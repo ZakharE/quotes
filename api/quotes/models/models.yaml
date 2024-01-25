@@ -16,9 +16,9 @@ components:
         - counter
       properties:
         base:
-          $ref: '#/components/schemas/Currency'
+          type: string
         counter:
-          $ref: '#/components/schemas/Currency'
+          type: string
 
     RefreshTask:
       type: object
@@ -27,7 +27,7 @@ components:
           type: integer
           format: int64
 
-    Quote:
+    QuoteData:
       type: object
       required:
         - ratio
@@ -35,13 +35,9 @@ components:
       properties:
         ratio:
           x-go-type: float64
+          x-oapi-codegen-extra-tags:
+            db: ratio
         time:
-          type: string
-
-    Currency:
-      type: string
-      enum: [ EUR, USD, MXN ]
-      x-enum-varnames:
-        - currency_eur
-        - currency_usd
-        - currency_mxn
+          x-go-type: time.Time
+          x-oapi-codegen-extra-tags:
+            db: time

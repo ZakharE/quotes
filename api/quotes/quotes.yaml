@@ -20,20 +20,20 @@ paths:
           description: base currency
           required: true
           schema:
-            $ref: './models/models.yaml#/components/schemas/Currency'
+            type: string
         - name: counterCurrency
           in: query
           description: counter currency
           required: true
           schema:
-            $ref: './models/models.yaml#/components/schemas/Currency'
+            type: string
       responses:
         '200':
           description: current quote value with time at which this quote is valid
           content:
             application/json:
               schema:
-                $ref: './models/models.yaml#/components/schemas/Quote'
+                $ref: './models/models.yaml#/components/schemas/QuoteData'
         '404':
           description: returns if no data available at the moment, i.e no refresh task were executed
           content:
@@ -66,9 +66,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './models/models.yaml#/components/schemas/Quote'
+                $ref: './models/models.yaml#/components/schemas/QuoteData'
         '404':
           description: returns if task with specified id doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
+        '425':
+          description: returns if task exists, but was not processed yet
           content:
             application/json:
               schema:

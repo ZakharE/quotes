@@ -30,8 +30,8 @@ func (t taskStorage) Save(ctx context.Context, pair models.CurrencyPair) (int64,
 
 func (t taskStorage) Get(ctx context.Context, id int64) (models.TaskDTO, error) {
 	result := models.TaskDTO{}
-	row := t.conn.QueryRowContext(ctx, "SELECT  base, counter, ratio, time, finished_at FROM refresh_task WHERE id = $1;", id)
-	err := row.Scan(&result.Base, &result.Counter, &result.Ratio, &result.Time, &result.TimeFinished)
+	row := t.conn.QueryRowContext(ctx, "SELECT  base, counter, ratio, time, is_finished FROM refresh_task WHERE id = $1;", id)
+	err := row.Scan(&result.Base, &result.Counter, &result.Ratio, &result.Time, &result.TimeFinished, &result.IsFinished)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.TaskDTO{}, fmt.Errorf("cannot get quote for task: %w", models.ErrNoRows)
@@ -51,13 +51,13 @@ func (t taskStorage) GetUnprocessed(ctx context.Context, limit int) ([]models.Ta
 	return result, nil
 }
 
-func (t taskStorage) SetProcessedAndUpdated(ctx context.Context, task models.TaskDTO, taskIds []int64) error {
+func (t taskStorage) SetProcessedAndUpdated(ctx context.Context, quote models.Quote, taskIds []int64) error {
 	tx, err := t.conn.BeginTxx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("cannot start transaction: %w: %w", models.ErrTransaction, err)
 	}
 
-	query, args, err := sqlx.In("UPDATE refresh_task SET ratio = ?, time = ?, is_finished = TRUE WHERE id IN (?);", task.Ratio, task.Time, taskIds)
+	query, args, err := sqlx.In("UPDATE refresh_task SET ratio = ?, time = ?, is_finished = TRUE WHERE id IN (?);", quote.Ratio, quote.Time, taskIds)
 	if err != nil {
 		rlErr := tx.Rollback()
 		if rlErr != nil {
@@ -80,7 +80,7 @@ func (t taskStorage) SetProcessedAndUpdated(ctx context.Context, task models.Tas
 											  VALUES (:base, :counter, :ratio, :time)
 											  ON CONFLICT (base, counter) DO UPDATE SET ratio=:ratio, time=:time;`
 
-	_, err = tx.NamedExecContext(ctx, query, task)
+	_, err = tx.NamedExecContext(ctx, query, quote)
 
 	if err != nil {
 		rlErr := tx.Rollback()

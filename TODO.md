@@ -1,0 +1,9 @@
+- [ ] Add models for client req/resp
+- [ ] add last retry column and save unprocessed batches
+- [ ] Add graceful shutdown
+- [ ] Add retries to client
+- [ ] Add rate limiter to client
+- [ ] Wrap app in docker
+- [ ] add server start at command
+- [ ] Add map with currency to models
+- [x] Add Too soon status code for task id
