@@ -1,6 +1,6 @@
 - [x] add server start at command
 - [x] Add graceful shutdown
-- [ ] add index
+- [x] add index
 - [ ] Wrap app in docker
 - [ ] Add retries to client
 - [ ] Add rate limiter to client
