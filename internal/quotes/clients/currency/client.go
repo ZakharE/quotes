@@ -1,4 +1,4 @@
-package currency_api
+package currency
 
 import (
 	"context"
@@ -90,10 +90,10 @@ func (c currenciesClient) parseResponse(pair models.CurrencyPair, response map[s
 	if !ok {
 		return models.TaskDTO{}, models.ErrParse
 	}
-
+	ratio := val.(float64)
 	return models.TaskDTO{
 		CurrencyPair: pair,
 		Time:         &date,
-		Ratio:        val.(*float64),
+		Ratio:        &ratio,
 	}, err
 }

@@ -7,9 +7,10 @@ import (
 
 type TaskDTO struct {
 	CurrencyPair
+	TaskID       int64      `db:"id"`
 	Time         *time.Time `db:"time"`
-	Ratio        *float64   `db:"ratio"`         //would be better if we can store in struct with separate decimal and floating part.
-	TimeFinished *time.Time `db:"time_finished"` //TODO replace with pointers
+	Ratio        *float64   `db:"ratio"`
+	TimeFinished *time.Time `db:"time_finished"`
 }
 
 func (t TaskDTO) ToQuote() Quote {

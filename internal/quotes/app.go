@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -9,8 +10,9 @@ import (
 	"log/slog"
 	"os"
 	"path"
-	"plata_card_quotes/internal/quotes/clients/currency_api"
+	"plata_card_quotes/internal/quotes/clients/currency"
 	"plata_card_quotes/internal/quotes/config"
+	"plata_card_quotes/internal/quotes/daemons"
 	"plata_card_quotes/internal/quotes/db"
 	"plata_card_quotes/internal/quotes/server"
 	"plata_card_quotes/internal/quotes/service"
@@ -54,11 +56,21 @@ func main() {
 	taskStorage := db.NewTaskStorage(conn, logger)
 	quoteStorage := db.NewQuoteStorage(conn, logger)
 
-	client := currency_api.NewCurrencyQuotesClient(logger)
-	srv := server.NewQuotesServer(logger,
+	client := currency.NewCurrencyQuotesClient(logger)
+
+	srv := server.NewQuotesServer(
+		logger,
 		chi.NewRouter(),
 		service.NewQuotesService(logger, client, taskStorage, quoteStorage),
 	)
+	daemonWrapper := daemons.NewMultiDaemonWrapper(logger)
+	daemon := daemons.NewQuoteRefresherDaemon(client, taskStorage, logger)
+	daemonWrapper.Register(daemon)
+
+	go func() {
+		ctx := context.Background()
+		daemonWrapper.Start(ctx)
+	}()
 
 	srv.Start()
 }

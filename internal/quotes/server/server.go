@@ -44,6 +44,7 @@ func (qs *quotesServer) Start() {
 
 	h := NewStrictHandler(qs, nil)
 	HandlerFromMux(h, qs.mux)
+
 	s := &http.Server{
 		Handler: qs.mux,
 		Addr:    ":8080",
