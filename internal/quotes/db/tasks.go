@@ -46,9 +46,15 @@ func (t taskStorage) GetUnprocessed(ctx context.Context, limit int) ([]models.Ta
 	result := make([]models.TaskDTO, 0, limit)
 	query := `SELECT  id, base, counter FROM refresh_task WHERE status = $1 AND last_attempt_at < NOW() - INTERVAL '1 minutes' LIMIT  $2;`
 	err := t.conn.SelectContext(ctx, &result, query, models.TaskStatusInProgress, limit)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("%w: no new tasks were found ", models.ErrNoRows)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot retrieve rows: %w", err)
 	}
+
+	if len(result) == 0 {
+		return nil, models.ErrNoRows
+	}
+
 	return result, nil
 }
 

@@ -13,6 +13,7 @@ var (
 )
 
 type Daemon interface {
+	Name() string
 	ProcessBatch(ctx context.Context, batchSize int) error
 	BatchSize() int
 	BatchSleep() time.Duration
@@ -48,18 +49,20 @@ func (mdw *multiDaemonWrapper) startDaemon(ctx context.Context, d Daemon) {
 	for {
 		select {
 		case <-ctx.Done():
+			mdw.logger.Debug("Daemon was stopped", "daemon name", d.Name())
 			return
 		default:
 			err := d.ProcessBatch(ctx, d.BatchSize())
 			switch {
 			case errors.Is(err, ErrNoWork):
 				{
-					mdw.logger.Info("no work. sleep")
+					mdw.logger.Info("no work. sleep", "daemon", d.Name())
 					time.Sleep(d.NoWorkSleep())
 				}
 			case err != nil:
-				mdw.logger.Error("err during batch processing", "error", err)
+				mdw.logger.Error("error during batch processing", "error", err)
 			}
+			mdw.logger.Debug("batch was processed. sleep")
 			time.Sleep(d.BatchSleep())
 		}
 	}

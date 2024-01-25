@@ -1,12 +1,9 @@
 package daemons
 
 import (
-	"context"
-	"fmt"
 	"plata_card_quotes/internal/quotes/models"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func Test_splitByCurrency(t *testing.T) {
@@ -19,61 +16,61 @@ func Test_splitByCurrency(t *testing.T) {
 		want map[models.CurrencyPair][]int64
 	}{
 		{
-			name: "Split zero length",
+			name: "Splitting zero length slice returns empty map",
 			args: args{make([]models.TaskDTO, 0)},
 			want: make(map[models.CurrencyPair][]int64),
 		},
 		{
-			name: "Split by currency",
+			name: "Splits by currency",
 			args: args{[]models.TaskDTO{
 				{
 					CurrencyPair: models.CurrencyPair{
-						Base:    models.CurrencyEur,
-						Counter: models.CurrencyUsd,
+						Base:    models.CurrencyEUR,
+						Counter: models.CurrencyUSD,
 					},
 					TaskID: 1,
 				},
 				{
 					CurrencyPair: models.CurrencyPair{
-						Base:    models.CurrencyEur,
-						Counter: models.CurrencyUsd,
+						Base:    models.CurrencyEUR,
+						Counter: models.CurrencyUSD,
 					},
 					TaskID: 2,
 				},
 				{
 					CurrencyPair: models.CurrencyPair{
-						Base:    models.CurrencyEur,
-						Counter: models.CurrencyUsd,
+						Base:    models.CurrencyEUR,
+						Counter: models.CurrencyUSD,
 					},
 					TaskID: 3,
 				},
 				{
 					CurrencyPair: models.CurrencyPair{
-						Base:    models.CurrencyEur,
-						Counter: models.CurrencyMxn,
+						Base:    models.CurrencyEUR,
+						Counter: models.CurrencyMXN,
 					},
 					TaskID: 4,
 				},
 				{
 					CurrencyPair: models.CurrencyPair{
-						Base:    models.CurrencyMxn,
-						Counter: models.CurrencyEur,
+						Base:    models.CurrencyMXN,
+						Counter: models.CurrencyEUR,
 					},
 					TaskID: 5,
 				},
 			}},
 			want: map[models.CurrencyPair][]int64{
 				models.CurrencyPair{
-					Base:    models.CurrencyEur,
-					Counter: models.CurrencyUsd,
+					Base:    models.CurrencyEUR,
+					Counter: models.CurrencyUSD,
 				}: {1, 2, 3},
 				models.CurrencyPair{
-					Base:    models.CurrencyEur,
-					Counter: models.CurrencyMxn,
+					Base:    models.CurrencyEUR,
+					Counter: models.CurrencyMXN,
 				}: {4},
 				models.CurrencyPair{
-					Base:    models.CurrencyMxn,
-					Counter: models.CurrencyEur,
+					Base:    models.CurrencyMXN,
+					Counter: models.CurrencyEUR,
 				}: {5},
 			},
 		},
@@ -85,16 +82,4 @@ func Test_splitByCurrency(t *testing.T) {
 			}
 		})
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	go func(ctx context.Context) {
-		time.Sleep(10 * time.Second)
-		fmt.Print("LOL")
-	}(ctx)
-	select {
-	case <-ctx.Done():
-		fmt.Print(ctx.Err())
-	}
-	fmt.Print("NON BLOCK")
-
 }

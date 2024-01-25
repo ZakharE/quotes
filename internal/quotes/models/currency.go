@@ -1,9 +1,15 @@
 package models
 
+const (
+	CurrencyEUR = "eur"
+	CurrencyUSD = "usd"
+	CurrencyMXN = "mxn"
+)
+
 var supportedCurrency = map[string]struct{}{
-	"eur": {},
-	"usd": {},
-	"mxn": {},
+	CurrencyEUR: {},
+	CurrencyUSD: {},
+	CurrencyMXN: {},
 }
 
 func IsCurrencySupported(currency string) bool {

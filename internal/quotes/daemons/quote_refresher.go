@@ -56,11 +56,13 @@ func (n notificationEventDaemon) ProcessBatch(ctx context.Context, batchSize int
 			continue
 		}
 
-		err = n.refreshTaskRepository.MarkSuccessAndUpdate(ctx, quote, pairsByIds[pair])
+		err = n.refreshTaskRepository.MarkSuccessAndUpdate(ctx, quote, ids)
 		if err != nil {
 			n.logger.Error("Cannot save quote in database", "pair", pair, "error", err)
 			continue
 		}
+
+		n.logger.Debug("Tasks was updated", "ids", ids)
 	}
 	return nil
 }
@@ -90,4 +92,7 @@ func (n notificationEventDaemon) BatchSleep() time.Duration {
 
 func (n notificationEventDaemon) NoWorkSleep() time.Duration {
 	return time.Second * 20
+}
+func (n notificationEventDaemon) Name() string {
+	return "task_refresher"
 }
