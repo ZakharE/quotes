@@ -59,17 +59,17 @@ func (qs *quotesServer) Start() {
 }
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {
-	body := request.Body
-	if !models.IsCurrencySupported(body.Base) {
-		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", body.Base)}), nil
+	pair := request.Body.ToCurrencyPair()
+	if !models.IsCurrencySupported(pair.Base) {
+		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", pair.Base)}), nil
 	}
-	if !models.IsCurrencySupported(body.Counter) {
-		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", body.Counter)}), nil
+	if !models.IsCurrencySupported(pair.Counter) {
+		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", pair.Counter)}), nil
 	}
-	if body.Base == body.Counter {
+	if pair.Base == pair.Counter {
 		return RefreshQuote400JSONResponse(models.Error{Message: "Fields 'from' and 'to must differ!"}), nil
 	}
-	id, err := qs.quotesService.CreateRefreshTask(ctx, body.ToCurrencyPair())
+	id, err := qs.quotesService.CreateRefreshTask(ctx, pair)
 	if err != nil {
 		return RefreshQuotedefaultJSONResponse{models.Error{
 			Message: "Something went wrong",

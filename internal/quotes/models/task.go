@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+const (
+	TaskStatusSuccess    = "success"
+	TaskStatusFail       = "fail"
+	TaskStatusInProgress = "in_progress"
+)
+
 type TaskDTO struct {
 	CurrencyPair
 	TaskID       int64      `db:"id"`
@@ -12,11 +18,6 @@ type TaskDTO struct {
 	Ratio        *float64   `db:"ratio"`
 	TimeFinished *time.Time `db:"time_finished"`
 	IsFinished   bool       `db:"is_finished"`
-}
-
-type Quote struct {
-	CurrencyPair
-	QuoteData
 }
 
 func (t TaskDTO) ToQuoteData() QuoteData {
@@ -28,11 +29,6 @@ func (t TaskDTO) ToQuoteData() QuoteData {
 		quote.Ratio = *t.Ratio
 	}
 	return quote
-}
-
-type CurrencyPair struct {
-	Base    string `db:"base"`
-	Counter string `db:"counter"`
 }
 
 func (rt NewRefreshTask) ToCurrencyPair() CurrencyPair {

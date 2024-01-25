@@ -10,7 +10,8 @@ import (
 
 type RefreshTaskRepository interface {
 	GetUnprocessed(ctx context.Context, limit int) ([]models.TaskDTO, error)
-	SetProcessedAndUpdated(ctx context.Context, task models.Quote, taskIds []int64) error
+	MarkSuccessAndUpdate(ctx context.Context, task models.Quote, taskIds []int64) error
+	MarkFailed(ctx context.Context, ids []int64) error
 }
 
 type CurrencyQuotesClient interface {
@@ -43,20 +44,24 @@ func (n notificationEventDaemon) ProcessBatch(ctx context.Context, batchSize int
 
 	pairsByIds := splitByCurrency(tasks)
 	for pair := range pairsByIds {
+		ids := pairsByIds[pair]
 		quote, err := n.quotesClient.GetQuote(ctx, pair)
 		if err != nil {
-			n.logger.Error("Cannot get tasks for pair", "pair", pair, "error", err)
+			n.logger.Error("Cannot get quote for pair", "pair", pair, "error", err)
+			n.logger.Info("Mark tasks as 'failed'")
+			err = n.refreshTaskRepository.MarkFailed(ctx, ids)
+			if err != nil {
+				n.logger.Error("Cannot mark tasks as failed", "ids", ids, "error", err)
+			}
 			continue
 		}
-		// update by ids and with new values
-		err = n.refreshTaskRepository.SetProcessedAndUpdated(ctx, quote, pairsByIds[pair])
+
+		err = n.refreshTaskRepository.MarkSuccessAndUpdate(ctx, quote, pairsByIds[pair])
 		if err != nil {
 			n.logger.Error("Cannot save quote in database", "pair", pair, "error", err)
 			continue
 		}
-
 	}
-
 	return nil
 }
 

@@ -44,54 +44,76 @@ func (t taskStorage) Get(ctx context.Context, id int64) (models.TaskDTO, error) 
 
 func (t taskStorage) GetUnprocessed(ctx context.Context, limit int) ([]models.TaskDTO, error) {
 	result := make([]models.TaskDTO, 0, limit)
-	err := t.conn.SelectContext(ctx, &result, "SELECT  id, base, counter FROM refresh_task WHERE is_finished = FALSE;")
+	query := `SELECT  id, base, counter FROM refresh_task WHERE status = $1 AND last_attempt_at < NOW() - INTERVAL '1 minutes' LIMIT  $2;`
+	err := t.conn.SelectContext(ctx, &result, query, models.TaskStatusInProgress, limit)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("%w: no new tasks were found ", models.ErrNoRows)
 	}
 	return result, nil
 }
 
-func (t taskStorage) SetProcessedAndUpdated(ctx context.Context, quote models.Quote, taskIds []int64) error {
+func (t taskStorage) MarkSuccessAndUpdate(ctx context.Context, quote models.Quote, taskIds []int64) error {
+	return t.withTx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		query, args, err := sqlx.In("UPDATE refresh_task SET ratio = ?, time = ?, status = ?, last_attempt_at = NOW() WHERE id IN (?);", quote.Ratio, quote.Time, models.TaskStatusSuccess, taskIds)
+		if err != nil {
+			return fmt.Errorf("unable to transform an update query, %w", errors.Join(models.ErrTransactionRollback, err))
+		}
+
+		query = tx.Rebind(query)
+		_, err = tx.ExecContext(ctx, query, args...)
+
+		if err != nil {
+			return fmt.Errorf("unable to update resfresh task, %w", errors.Join(models.ErrTransactionRollback, err))
+		}
+
+		query = `
+				 INSERT INTO quote (base, counter, ratio, time)
+				 VALUES (:base, :counter, :ratio, :time)
+				 ON CONFLICT (base, counter) DO UPDATE SET ratio=:ratio,
+																		 time=:time;
+				 `
+
+		_, err = tx.NamedExecContext(ctx, query, quote)
+
+		if err != nil {
+			return fmt.Errorf("unable to update quote table, %w", errors.Join(models.ErrTransactionRollback, err))
+		}
+		return nil
+	})
+
+}
+
+func (t taskStorage) MarkFailed(ctx context.Context, taskIds []int64) error {
+	query, args, err := sqlx.In("UPDATE refresh_task SET  status = ?, last_attempt_at = NOW() WHERE id IN (?);", models.TaskStatusFail, taskIds)
+	if err != nil {
+		return fmt.Errorf("unable to transform an update query, %w", errors.Join(models.ErrTransactionRollback, err))
+	}
+
+	query = t.conn.Rebind(query)
+	_, err = t.conn.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("cannot mark tasks as failed: %w", err)
+	}
+	return nil
+}
+
+func (t taskStorage) withTx(ctx context.Context, f func(ctx context.Context, tx *sqlx.Tx) error) error {
 	tx, err := t.conn.BeginTxx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("cannot start transaction: %w: %w", models.ErrTransaction, err)
 	}
-
-	query, args, err := sqlx.In("UPDATE refresh_task SET ratio = ?, time = ?, is_finished = TRUE WHERE id IN (?);", quote.Ratio, quote.Time, taskIds)
-	if err != nil {
-		rlErr := tx.Rollback()
-		if rlErr != nil {
-			return fmt.Errorf("cannot rollback transaction after query rebinding: %w", errors.Join(models.ErrTransaction, err, rlErr))
-		}
-		return fmt.Errorf("unable to update refresh_task table, %w", errors.Join(models.ErrTransactionRollback, err))
-	}
-
-	query = tx.Rebind(query)
-	_, err = tx.ExecContext(ctx, query, args...)
-
+	err = f(ctx, tx)
 	if err != nil {
 		rlErr := tx.Rollback()
 		if rlErr != nil {
 			return fmt.Errorf("cannot rollback transaction: %w", errors.Join(models.ErrTransaction, err, rlErr))
 		}
-		return fmt.Errorf("unable to rebind query, %w", errors.Join(models.ErrTransactionRollback, err))
-	}
-	query = `INSERT INTO quote (base, counter, ratio, time)
-											  VALUES (:base, :counter, :ratio, :time)
-											  ON CONFLICT (base, counter) DO UPDATE SET ratio=:ratio, time=:time;`
-
-	_, err = tx.NamedExecContext(ctx, query, quote)
-
-	if err != nil {
-		rlErr := tx.Rollback()
-		if rlErr != nil {
-			return fmt.Errorf("cannot rollback transaction: %w", errors.Join(models.ErrTransaction, err, rlErr))
-		}
-		return fmt.Errorf("unable to update quote table, %w", errors.Join(models.ErrTransactionRollback, err))
+		return fmt.Errorf("cannot execute transaction: %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
 		return fmt.Errorf("cannot commit transaction: %w: %w", models.ErrTransaction, err)
 	}
-	return err
+	return nil
+
 }
