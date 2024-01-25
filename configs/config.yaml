@@ -1,6 +1,15 @@
+server:
+  port: 8080
+
 db:
   host: localhost
   port: 5432
   user: quotes_user
   password: quotes_pass
   name: quotes_db
+
+daemons:
+  task_refresher:
+    batch_size: 100
+    sleep_batch: 10 #in seconds
+    sleep_no_work: 20

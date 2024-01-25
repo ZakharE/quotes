@@ -5,8 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os/signal"
+	"plata_card_quotes/internal/quotes/config"
 	"plata_card_quotes/internal/quotes/models"
 	"plata_card_quotes/internal/quotes/service"
+	"syscall"
+	"time"
 
 	"net/http"
 	"os"
@@ -16,17 +20,21 @@ import (
 )
 
 type quotesServer struct {
+	cfg           *config.Server
+	srv           *http.Server
 	logger        *slog.Logger
 	mux           *chi.Mux
 	quotesService *service.QuotesService
 }
 
 func NewQuotesServer(
+	cfg *config.Server,
 	logger *slog.Logger,
 	mux *chi.Mux,
 	quotesService *service.QuotesService,
 ) *quotesServer {
 	return &quotesServer{
+		cfg:           cfg,
 		logger:        logger,
 		mux:           mux,
 		quotesService: quotesService,
@@ -46,16 +54,20 @@ func (qs *quotesServer) Start() {
 	h := NewStrictHandler(qs, nil)
 	HandlerFromMux(h, qs.mux)
 
-	s := &http.Server{
+	qs.srv = &http.Server{
 		Handler: qs.mux,
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", qs.cfg.Port),
 	}
 
-	err = s.ListenAndServe()
+	serverCtx := qs.gracefulShutdown()
+	err = qs.srv.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		qs.logger.Warn("Some error occured during shutdown", "error", err)
 		os.Exit(1)
 	}
+	qs.logger.Debug("Shutting down the server. Wait...")
+	<-serverCtx.Done()
+	qs.logger.Debug("Server was shut down")
 }
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {
@@ -104,4 +116,31 @@ func (qs *quotesServer) GetTask(ctx context.Context, request GetTaskRequestObjec
 		return GetTaskdefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
 	}
 	return GetTask200JSONResponse(task.ToQuoteData()), nil
+}
+
+func (qs *quotesServer) gracefulShutdown() context.Context {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+
+	go func() {
+		<-signalCh
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		go func() {
+			<-shutdownCtx.Done()
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
+				qs.logger.Error("graceful shutdown timed out.. forcing exit.")
+				os.Exit(1)
+			}
+		}()
+
+		// Trigger graceful shutdown
+		err := qs.srv.Shutdown(shutdownCtx)
+		if err != nil {
+			qs.logger.Error("graceful shutdown timed out.. forcing exit.")
+			os.Exit(1)
+		}
+		serverStopCtx()
+	}()
+	return serverCtx
 }

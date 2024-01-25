@@ -1,5 +1,5 @@
-- [ ] add server start at command
-- [ ] Add graceful shutdown
+- [x] add server start at command
+- [x] Add graceful shutdown
 - [ ] add index
 - [ ] Wrap app in docker
 - [ ] Add retries to client

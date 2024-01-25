@@ -1,4 +1,4 @@
-package main
+package quotes
 
 import (
 	"context"
@@ -18,16 +18,12 @@ import (
 	"plata_card_quotes/internal/quotes/service"
 )
 
-func main() {
+func StartApp() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./configs/")
 	err := viper.ReadInConfig() // Find and read the config file
 
-	getwd, err := os.Getwd()
-	if err != nil {
-		return
-	}
 	if err != nil {
 		logger.Error("Cannot find config file", "error", err)
 		os.Exit(1)
@@ -41,8 +37,11 @@ func main() {
 	}
 	// --- setup database
 	conn := sqlx.MustConnect("postgres", cfg.Db.ConnectionString())
-
-	fs := os.DirFS(path.Join(getwd, "sql"))
+	currentWd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	fs := os.DirFS(path.Join(currentWd, "sql"))
 	goose.SetBaseFS(fs)
 
 	if err := goose.SetDialect("postgres"); err != nil {
@@ -59,12 +58,13 @@ func main() {
 	client := currency.NewCurrencyQuotesClient(logger)
 
 	srv := server.NewQuotesServer(
+		&cfg.Server,
 		logger,
 		chi.NewRouter(),
 		service.NewQuotesService(logger, client, taskStorage, quoteStorage),
 	)
 	daemonWrapper := daemons.NewMultiDaemonWrapper(logger)
-	daemon := daemons.NewQuoteRefresherDaemon(client, taskStorage, logger)
+	daemon := daemons.NewQuoteRefresherDaemon(&cfg.DaemonSettings.TaskRefresher, client, taskStorage, logger)
 	daemonWrapper.Register(daemon)
 
 	go func() {

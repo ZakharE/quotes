@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"plata_card_quotes/internal/quotes/config"
 	"plata_card_quotes/internal/quotes/models"
 	"time"
 )
@@ -19,17 +20,20 @@ type CurrencyQuotesClient interface {
 }
 
 type notificationEventDaemon struct {
+	cfg                   *config.DaemonSettings
 	logger                *slog.Logger
 	refreshTaskRepository RefreshTaskRepository
 	quotesClient          CurrencyQuotesClient
 }
 
 func NewQuoteRefresherDaemon(
+	cfg *config.DaemonSettings,
 	quotesClient CurrencyQuotesClient,
 	refreshTaskRepository RefreshTaskRepository,
 	logger *slog.Logger,
 ) *notificationEventDaemon {
 	return &notificationEventDaemon{
+		cfg:                   cfg,
 		quotesClient:          quotesClient,
 		refreshTaskRepository: refreshTaskRepository,
 		logger:                logger,
@@ -83,15 +87,15 @@ func splitByCurrency(tasks []models.TaskDTO) map[models.CurrencyPair][]int64 {
 }
 
 func (n notificationEventDaemon) BatchSize() int {
-	return 100
+	return n.cfg.BatchSize
 }
 
 func (n notificationEventDaemon) BatchSleep() time.Duration {
-	return time.Second * 10
+	return time.Second * n.cfg.BatchSleep
 }
 
 func (n notificationEventDaemon) NoWorkSleep() time.Duration {
-	return time.Second * 20
+	return time.Second * n.cfg.NoWorkSleep
 }
 func (n notificationEventDaemon) Name() string {
 	return "task_refresher"

@@ -1,9 +1,27 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Config struct {
-	Db Db `mapstructure:"db"`
+	Server         Server  `mapstructure:"server"`
+	Db             Db      `mapstructure:"db"`
+	DaemonSettings Daemons `mapstructure:"daemons"`
+}
+
+type Server struct {
+	Port int `mapstructure:"port"`
+}
+
+type Daemons struct {
+	TaskRefresher DaemonSettings `mapstructure:"task_refresher"`
+}
+type DaemonSettings struct {
+	BatchSize   int           `mapstructure:"batch_size"`
+	BatchSleep  time.Duration `mapstructure:"sleep_batch"`
+	NoWorkSleep time.Duration `mapstructure:"sleep_no_rows"`
 }
 
 type Db struct {
