@@ -38,14 +38,21 @@ type RefreshTask struct {
 	Id *int64 `json:"id,omitempty"`
 }
 
+// TaskResponseError defines model for TaskResponseError.
+type TaskResponseError struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/5SRQU/7MAzFv4v1Pyb/C4hDbkhwRQLtxDQkr3W7wBoHxxWDqt8dJS0gugnBJXpy7N97",
-	"lgeouIscKGgCN0CqdtRhkdciLFlE4Uiinkq5o5SwpSz1NRI4SCo+tDCOBoSeey9Ug1t/Nm7MRyNvH6lS",
-	"GA3c0MsdNUJpt8L0dGyyxVQcIqqSBHDwsEb7dmnvN8PZ+A/M0ttAxX1Qkj9NLRIX1y/SqeC3PStdoeJx",
-	"ZkH1nMXBtmznyWbPqBfnYOBgGaO3FdfUUrB0UEGr2JbZegtuBuRQ6jtaknLt/yp//IZVCONywclh5p9a",
-	"78ej+Dq/DUuHCg58mBabIT4otSRT/u/cXPKhYXCh3+8NcKSA0YMDMPlYuzT9jO8BAAD//6tZ0RyOAgAA",
+	"H4sIAAAAAAAC/5SSQUvDQBCF/8vgcdeL4mFvgl4FS0+WCtNkkq42O+vsBKsl/102iRWSIu0lDLv7vvce",
+	"mQMU3EQOFDSBO0AqttRgPz6KsOQhCkcS9dQfN5QS1pRH/YoEDpKKDzV0nQGhj9YLleBWx4dr8/uQN29U",
+	"KHQGnuhzQZVQ2i4xvc9NNph6h4iqJAEcvK7Qft/bl/XhprsCM/U2UHAblOQi1SRx7/pHOhX8uWWlB1Sc",
+	"ZxZUz3nY25rtqKx2jHp3Cwb2ljF6W3BJNQVLexW0inWvLTfgRkAOpb6hKSmfXS/zxTmsntBNCw4OI/9U",
+	"vX9/ii/zt2JpUMGBD0OxEeKDUk0y5J9yM3BBKXJIdPFeGUiK2qbzV+6omHfMEh8qBhfa3c4ARwoYPTgA",
+	"kxdnm4ab7icAAP//E6I7hxoDAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

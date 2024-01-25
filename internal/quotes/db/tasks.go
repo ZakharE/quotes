@@ -30,8 +30,8 @@ func (t taskStorage) Save(ctx context.Context, pair models.CurrencyPair) (int64,
 
 func (t taskStorage) Get(ctx context.Context, id int64) (models.TaskDTO, error) {
 	result := models.TaskDTO{}
-	row := t.conn.QueryRowContext(ctx, "SELECT  base, counter, ratio, time, is_finished FROM refresh_task WHERE id = $1;", id)
-	err := row.Scan(&result.Base, &result.Counter, &result.Ratio, &result.Time, &result.TimeFinished, &result.IsFinished)
+	row := t.conn.QueryRowContext(ctx, "SELECT  base, counter, ratio, time, status FROM refresh_task WHERE id = $1;", id)
+	err := row.Scan(&result.Base, &result.Counter, &result.Ratio, &result.Time, &result.Status)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.TaskDTO{}, fmt.Errorf("cannot get quote for task: %w", models.ErrNoRows)
@@ -106,7 +106,7 @@ func (t taskStorage) MarkFailed(ctx context.Context, taskIds []int64) error {
 func (t taskStorage) withTx(ctx context.Context, f func(ctx context.Context, tx *sqlx.Tx) error) error {
 	tx, err := t.conn.BeginTxx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("cannot start transaction: %w: %w", models.ErrTransaction, err)
+		return fmt.Errorf("cannot start transaction: %w", errors.Join(models.ErrTransaction, err))
 	}
 	err = f(ctx, tx)
 	if err != nil {

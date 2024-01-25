@@ -1,5 +1,7 @@
 package models
 
+import "strings"
+
 const (
 	CurrencyEUR = "eur"
 	CurrencyUSD = "usd"
@@ -20,4 +22,8 @@ func IsCurrencySupported(currency string) bool {
 type CurrencyPair struct {
 	Base    string `db:"base"`
 	Counter string `db:"counter"`
+}
+
+func NewCurrencyPair(base string, counter string) CurrencyPair {
+	return CurrencyPair{Base: strings.ToLower(base), Counter: strings.ToLower(counter)}
 }

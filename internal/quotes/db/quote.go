@@ -20,8 +20,7 @@ func NewQuoteStorage(conn *sqlx.DB, logger *slog.Logger) *quoteStorage {
 }
 func (qs quoteStorage) Get(ctx context.Context, pair models.CurrencyPair) (models.QuoteData, error) {
 	var quote models.QuoteData
-	row := qs.conn.QueryRowContext(ctx, "SELECT ratio, time  FROM quote WHERE base = $1 AND counter = $2;", pair.Base, pair.Counter)
-	err := row.Scan(&quote.Time, &quote.Ratio)
+	err := qs.conn.GetContext(ctx, &quote, "SELECT ratio, time  FROM quote WHERE base = $1 AND counter = $2;", pair.Base, pair.Counter)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.QuoteData{}, fmt.Errorf("cannot get quote : %w", models.ErrNoRows)

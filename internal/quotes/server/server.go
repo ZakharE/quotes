@@ -59,7 +59,7 @@ func (qs *quotesServer) Start() {
 }
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {
-	pair := request.Body.ToCurrencyPair()
+	pair := models.NewCurrencyPair(request.Body.Base, request.Body.Counter)
 	if !models.IsCurrencySupported(pair.Base) {
 		return RefreshQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", pair.Base)}), nil
 	}
@@ -79,13 +79,10 @@ func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRe
 }
 
 func (qs *quotesServer) GetLastQuote(ctx context.Context, request GetLastQuoteRequestObject) (GetLastQuoteResponseObject, error) {
-	pair := models.CurrencyPair{
-		Base:    request.Params.BaseCurrency,
-		Counter: request.Params.CounterCurrency,
-	}
+	pair := models.NewCurrencyPair(request.Params.BaseCurrency, request.Params.CounterCurrency)
 	quote, err := qs.quotesService.GetLastQuote(ctx, pair)
 	if errors.Is(err, models.ErrNoRows) {
-		return GetLastQuote404JSONResponse(models.Error{Message: "no task with such id"}), nil
+		return GetLastQuote404JSONResponse(models.Error{Message: "no quote with such currency pair"}), nil
 	}
 	if err != nil {
 		return GetLastQuotedefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
@@ -98,9 +95,11 @@ func (qs *quotesServer) GetTask(ctx context.Context, request GetTaskRequestObjec
 	if errors.Is(err, models.ErrNoRows) {
 		return GetTask404JSONResponse(models.Error{Message: "no task with such id"}), nil
 	}
-	if !task.IsFinished {
-		return GetTask425JSONResponse(models.Error{Message: "task still in progress. try again later"}), nil
+
+	if task.Status != models.TaskStatusSuccess {
+		return GetTask425JSONResponse(models.TaskResponseError{Message: "task still in progress. try again later", Status: task.Status}), nil
 	}
+
 	if err != nil {
 		return GetTaskdefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil
 	}

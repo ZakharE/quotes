@@ -8,4 +8,4 @@ generate-server:
 generate-models:
 	oapi-codegen  -config ./api/quotes/models/models-cfg.yaml ./api/quotes/models/models.yaml
 
-generate-all: generate-server generate-server
+generate-all: generate-models generate-server

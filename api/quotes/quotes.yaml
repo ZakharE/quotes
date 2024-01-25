@@ -21,12 +21,15 @@ paths:
           required: true
           schema:
             type: string
+            pattern: '^[a-zA-Z]{3}$'
         - name: counterCurrency
           in: query
           description: counter currency
           required: true
           schema:
             type: string
+            pattern: '^[a-zA-Z]{3}$'
+
       responses:
         '200':
           description: current quote value with time at which this quote is valid
@@ -78,7 +81,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './models/models.yaml#/components/schemas/Error'
+                $ref: './models/models.yaml#/components/schemas/TaskResponseError'
 
         'default':
           description: error with description

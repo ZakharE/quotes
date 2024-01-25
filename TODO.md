@@ -1,10 +1,10 @@
-- [x] add last retry column and save unprocessed batches
+- [ ] add server start at command
 - [ ] Add graceful shutdown
+- [ ] add index
+- [ ] Wrap app in docker
 - [ ] Add retries to client
 - [ ] Add rate limiter to client
-- [ ] Wrap app in docker
-- [ ] add server start at command
-- [ ] add index
+- [x] add last retry column and save unprocessed batches
 - [x] Add models for client req/resp
 - [x] Add map with currency to models and validation
 - [x] Add Too soon status code for task id

@@ -1,5 +1,16 @@
 components:
   schemas:
+    TaskResponseError:
+      type: object
+      required:
+        - message
+        - status
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+
     Error:
       type: object
       required:

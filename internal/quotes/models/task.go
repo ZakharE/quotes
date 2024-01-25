@@ -1,7 +1,6 @@
 package models
 
 import (
-	"strings"
 	"time"
 )
 
@@ -13,11 +12,10 @@ const (
 
 type TaskDTO struct {
 	CurrencyPair
-	TaskID       int64      `db:"id"`
-	Time         *time.Time `db:"time"`
-	Ratio        *float64   `db:"ratio"`
-	TimeFinished *time.Time `db:"time_finished"`
-	IsFinished   bool       `db:"is_finished"`
+	TaskID int64      `db:"id"`
+	Time   *time.Time `db:"time"`
+	Ratio  *float64   `db:"ratio"`
+	Status string     `db:"status"`
 }
 
 func (t TaskDTO) ToQuoteData() QuoteData {
@@ -29,11 +27,4 @@ func (t TaskDTO) ToQuoteData() QuoteData {
 		quote.Ratio = *t.Ratio
 	}
 	return quote
-}
-
-func (rt NewRefreshTask) ToCurrencyPair() CurrencyPair {
-	return CurrencyPair{
-		Base:    strings.ToLower(rt.Base),
-		Counter: strings.ToLower(rt.Counter),
-	}
 }
