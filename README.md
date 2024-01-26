@@ -90,7 +90,7 @@ The logic is following:
 
 # Code generation
 
-To generate code for server and models run
+To generate missing code dependencies for server and models run
 
 ```shell
 make generate-all
