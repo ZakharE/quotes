@@ -40,7 +40,7 @@ docker-compose -f ./deployments/docker-compose.yml  up  --build -d
 To stop the app run following from project directory
 
 ```shell
-docker-compose -f ./deployments/docker-compose.yml  up  --build -d
+docker-compose -f ./deployments/docker-compose.yml stop 
 ```
 
 # Available endpoints
