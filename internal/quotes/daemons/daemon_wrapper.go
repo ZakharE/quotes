@@ -51,6 +51,12 @@ func (mdw *multiDaemonWrapper) Start(ctx context.Context) {
 }
 
 func (mdw *multiDaemonWrapper) startDaemon(ctx context.Context, d Daemon) {
+	defer func() {
+		if r := recover(); r != nil {
+			mdw.logger.Error("Daemon was exit due to panic", "daemon name", d.Name(), "panic", r)
+		}
+	}()
+
 	batchTick := time.NewTicker(d.BatchSleep())
 	for {
 		select {
