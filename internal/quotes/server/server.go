@@ -107,7 +107,7 @@ func (qs *quotesServer) GetLastQuote(ctx context.Context, request GetLastQuoteRe
 	}
 	quote, err := qs.quotesService.GetLastQuote(ctx, pair)
 	if errors.Is(err, models.ErrNoRows) {
-		return GetLastQuote404JSONResponse(models.Error{Message: "no quote with such currency pair"}), nil
+		return GetLastQuote404JSONResponse(models.Error{Message: "no quote with such currency pair. create task first"}), nil
 	}
 	if err != nil {
 		return GetLastQuotedefaultJSONResponse{models.Error{Message: "something went wrong"}, 500}, nil

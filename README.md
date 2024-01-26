@@ -12,7 +12,7 @@ To run application you must have `Docker` installed.
 
 # How to run
 
-Clone this repo
+Clone repo
 
 ## If you have Make installed
 Simply run
@@ -46,10 +46,28 @@ docker-compose -f ./deployments/docker-compose.yml stop
 # Available endpoints
 
 All endpoint described in `api/quotes/quotes.yaml` file.
-For GoLand users there is file with requests located at `requests/quotes.http`
 
-# Refresh logic
+For GoLand users there is file with requests located at `requests/quotes.http` that yu can run from IDE.
 
+For terminal users there is cUrl wrapper in `requests/curl` directory.
+
+To test endpoint run
+
+```
+sh ./{script_name}.sh {param1} {param2}
+```
+
+# App logic
+
+## First start
+
+On the first start app's database is empty.
+
+You need to create task first to be able to use endpoint `localhost:8080/quote?baseCurrency=eur&counterCurrency=usd`
+
+Otherwise, status 404 will be return.
+
+## Async refresh
 Async refresh happens in `quote_refresher` daemon.
 
 The logic is following:
