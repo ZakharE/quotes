@@ -44,7 +44,7 @@ func (t taskStorage) Get(ctx context.Context, id int64) (models.TaskDTO, error) 
 
 func (t taskStorage) GetUnprocessed(ctx context.Context, limit int) ([]models.TaskDTO, error) {
 	result := make([]models.TaskDTO, 0, limit)
-	query := `SELECT  id, base, counter FROM refresh_task WHERE last_attempt_at < NOW() - INTERVAL '1 minutes' AND status = $1 LIMIT  $2;`
+	query := `SELECT  id, base, counter FROM refresh_task WHERE last_attempt_at < NOW() - INTERVAL '1 minutes' AND status = $1 ORDER BY id LIMIT  $2;`
 	err := t.conn.SelectContext(ctx, &result, query, models.TaskStatusInProgress, limit)
 
 	if err != nil {

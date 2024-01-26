@@ -20,22 +20,18 @@ import (
 
 func StartApp() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	viper.SetEnvPrefix("ENV")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.MustBindEnv("db.host", "DB_HOST")
+	viper.AutomaticEnv()
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./configs/")
 	err := viper.ReadInConfig() // Find and read the config file
+	viper.Debug()
 
 	if err != nil {
 		logger.Error("Cannot find config file", "error", err)
-		os.Exit(1)
-	}
-
-	viper.SetEnvPrefix("ENV")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	err = viper.BindEnv("db.host", "DB_HOST")
-
-	if err != nil {
-		logger.Error("Cannot bind env var", "error", err)
 		os.Exit(1)
 	}
 
