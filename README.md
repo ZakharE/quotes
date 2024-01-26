@@ -47,11 +47,11 @@ docker-compose -f ./deployments/docker-compose.yml stop
 
 All endpoint described in `api/quotes/quotes.yaml` file.
 
-For GoLand users there is file with requests located at `requests/quotes.http` that yu can run from IDE.
+For GoLand users there is file with requests located at `requests/quotes.http` that you can run from IDE.
 
 For terminal users there is cUrl wrapper in `requests/curl` directory.
 
-To test endpoint run
+To call an endpoint run
 
 ```
 sh ./{script_name}.sh {param1} {param2}
