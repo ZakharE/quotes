@@ -34,6 +34,9 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 	url := "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{from}/{to}.json"
 	type resp map[string]interface{}
 	response, err := c.client.
+		SetRetryCount(3).
+		SetRetryWaitTime(3 * time.Second).
+		SetRetryMaxWaitTime(15 * time.Second).
 		R().
 		SetContext(ctx).
 		SetHeaders(map[string]string{
@@ -42,8 +45,8 @@ func (c currenciesClient) GetQuote(ctx context.Context, pair models.CurrencyPair
 		).
 		SetResult(&resp{}).
 		SetPathParams(map[string]string{
-			"from": string(pair.Base),
-			"to":   string(pair.Counter),
+			"from": pair.Base,
+			"to":   pair.Counter,
 		}).
 		Get(url)
 

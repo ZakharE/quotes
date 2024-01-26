@@ -5,12 +5,14 @@ To run application you must have `Docker` installed.
 # Used technologies
 
 - Go: 1.21
-- Database: `postgreSql`
+- Database: `postgresql`
 - Sql migrations: `goose`
 - Api handlers and model code generation by api spec: `github.com/deepmap/oapi-codegen`
 - Docker, docker-compose
 
 # How to run
+
+Clone this repo
 
 ## If you have Make installed
 Simply run
