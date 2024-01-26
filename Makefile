@@ -6,8 +6,9 @@ generate-models:
 
 generate-all: generate-models generate-server
 
+DOCKER_COMPOSE_FILE_PATH = ./deployments/docker-compose.yml
 app-start:
-	docker-compose up  --build -d
+	docker-compose -f $(DOCKER_COMPOSE_FILE_PATH)  up  --build -d
 
 app-stop:
-	docker-compose stop
+	docker-compose -f $(DOCKER_COMPOSE_FILE_PATH) stop

@@ -2,8 +2,8 @@ version: '3'
 services:
   quotes:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./deployments/Dockerfile
     ports:
       - "8080:8080"
     depends_on:

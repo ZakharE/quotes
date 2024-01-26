@@ -1,0 +1,23 @@
+### Create task
+POST localhost:8080/quote/task
+Content-Type: application/json
+
+{
+  "base": "eur",
+  "counter": "uSD"
+}
+
+### Get task by id
+GET localhost:8080/quote/task/1
+Content-Type: application/json
+
+### Get task by non-existenet id
+GET localhost:8080/quote/task/1456
+Content-Type: application/json
+
+### Get quote by pair
+GET localhost:8080/quote?baseCurrency=eur&counterCurrency=usd
+Content-Type: application/json
+
+### Client api response example
+GET https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/usd.json
