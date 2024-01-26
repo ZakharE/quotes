@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"plata_card_quotes/internal/quotes/config"
 	"plata_card_quotes/internal/quotes/models"
+	"sync"
 	"time"
 )
 
@@ -47,27 +48,31 @@ func (n notificationEventDaemon) ProcessBatch(ctx context.Context, batchSize int
 	}
 
 	pairsByIds := splitByCurrency(tasks)
+	wg := sync.WaitGroup{}
 	for pair := range pairsByIds {
+		wg.Add(1)
 		ids := pairsByIds[pair]
-		quote, err := n.quotesClient.GetQuote(ctx, pair)
-		if err != nil {
-			n.logger.Error("Cannot get quote for pair", "pair", pair, "error", err)
-			n.logger.Info("Mark tasks as 'failed'")
-			err = n.refreshTaskRepository.MarkFailed(ctx, ids)
+		go func(pair models.CurrencyPair, ids []int64) {
+			defer wg.Done()
+			quote, err := n.quotesClient.GetQuote(ctx, pair)
 			if err != nil {
-				n.logger.Error("Cannot mark tasks as failed", "ids", ids, "error", err)
+				n.logger.Error("Cannot get quote for pair", "pair", pair, "error", err)
+				n.logger.Info("Mark tasks as 'failed'")
+				err = n.refreshTaskRepository.MarkFailed(ctx, ids)
+				if err != nil {
+					n.logger.Error("Cannot mark tasks as failed", "ids", ids, "error", err)
+				}
 			}
-			continue
-		}
 
-		err = n.refreshTaskRepository.MarkSuccessAndUpdate(ctx, quote, ids)
-		if err != nil {
-			n.logger.Error("Cannot save quote in database", "pair", pair, "error", err)
-			continue
-		}
+			err = n.refreshTaskRepository.MarkSuccessAndUpdate(ctx, quote, ids)
+			if err != nil {
+				n.logger.Error("Cannot save quote in database", "pair", pair, "error", err)
+			}
 
-		n.logger.Debug("Tasks was updated", "ids", ids)
+			n.logger.Debug("Tasks was updated", "ids", ids)
+		}(pair, ids)
 	}
+	wg.Wait()
 	return nil
 }
 

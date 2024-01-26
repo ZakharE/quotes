@@ -1,7 +1,7 @@
 - [x] add server start at command
 - [x] Add graceful shutdown
 - [x] add index
-- [ ] Wrap app in docker
+- [x] Wrap app in docker
 - [ ] Add retries to client
 - [ ] Add rate limiter to client
 - [x] add last retry column and save unprocessed batches

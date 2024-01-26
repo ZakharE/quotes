@@ -5,39 +5,41 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
+	"os"
 	"os/signal"
 	"plata_card_quotes/internal/quotes/config"
+	"plata_card_quotes/internal/quotes/daemons"
 	"plata_card_quotes/internal/quotes/models"
 	"plata_card_quotes/internal/quotes/service"
 	"syscall"
 	"time"
-
-	"net/http"
-	"os"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/chi-middleware"
 	"github.com/go-chi/chi/v5"
 )
 
 type quotesServer struct {
-	cfg           *config.Server
-	srv           *http.Server
-	logger        *slog.Logger
-	mux           *chi.Mux
-	quotesService *service.QuotesService
+	cfg            *config.Server
+	srv            *http.Server
+	logger         *slog.Logger
+	mux            *chi.Mux
+	quotesService  *service.QuotesService
+	daemonsWrapper daemons.DaemonsWrapper
 }
 
-func NewQuotesServer(
-	cfg *config.Server,
+func NewQuotesServer(cfg *config.Server,
 	logger *slog.Logger,
 	mux *chi.Mux,
 	quotesService *service.QuotesService,
+	daemonsWrapper daemons.DaemonsWrapper,
 ) *quotesServer {
 	return &quotesServer{
-		cfg:           cfg,
-		logger:        logger,
-		mux:           mux,
-		quotesService: quotesService,
+		cfg:            cfg,
+		logger:         logger,
+		mux:            mux,
+		quotesService:  quotesService,
+		daemonsWrapper: daemonsWrapper,
 	}
 }
 
@@ -47,10 +49,9 @@ func (qs *quotesServer) Start() {
 		qs.logger.Error("unable to get swagger.exit")
 		os.Exit(1)
 	}
-
 	swagger.Servers = nil
-	qs.mux.Use(middleware.OapiRequestValidator(swagger))
 
+	qs.mux.Use(middleware.OapiRequestValidator(swagger))
 	h := NewStrictHandler(qs, nil)
 	HandlerFromMux(h, qs.mux)
 
@@ -60,14 +61,15 @@ func (qs *quotesServer) Start() {
 	}
 
 	serverCtx := qs.gracefulShutdown()
+	qs.daemonsWrapper.Start(serverCtx)
 	err = qs.srv.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		qs.logger.Warn("Some error occured during shutdown", "error", err)
 		os.Exit(1)
 	}
-	qs.logger.Debug("Shutting down the server. Wait...")
 	<-serverCtx.Done()
-	qs.logger.Debug("Server was shut down")
+
+	qs.logger.Info("Server was shut down")
 }
 
 func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRequestObject) (RefreshQuoteResponseObject, error) {

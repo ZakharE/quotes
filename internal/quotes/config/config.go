@@ -21,7 +21,7 @@ type Daemons struct {
 type DaemonSettings struct {
 	BatchSize   int           `mapstructure:"batch_size"`
 	BatchSleep  time.Duration `mapstructure:"sleep_batch"`
-	NoWorkSleep time.Duration `mapstructure:"sleep_no_rows"`
+	NoWorkSleep time.Duration `mapstructure:"sleep_no_work"`
 }
 
 type Db struct {

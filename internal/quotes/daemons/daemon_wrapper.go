@@ -19,10 +19,15 @@ type Daemon interface {
 	BatchSleep() time.Duration
 	NoWorkSleep() time.Duration
 }
+type DaemonsWrapper interface {
+	Register(d Daemon)
+	Start(ctx context.Context)
+}
 
 type multiDaemonWrapper struct {
-	daemons []Daemon
-	logger  *slog.Logger
+	daemons  []Daemon
+	stopFunc []context.CancelFunc
+	logger   *slog.Logger
 }
 
 func NewMultiDaemonWrapper(logger *slog.Logger) *multiDaemonWrapper {
@@ -46,24 +51,22 @@ func (mdw *multiDaemonWrapper) Start(ctx context.Context) {
 }
 
 func (mdw *multiDaemonWrapper) startDaemon(ctx context.Context, d Daemon) {
+	batchTick := time.NewTicker(d.BatchSleep())
 	for {
 		select {
 		case <-ctx.Done():
-			mdw.logger.Debug("Daemon was stopped", "daemon name", d.Name())
+			mdw.logger.Info("Daemon was stopped", "daemon name", d.Name())
+			batchTick.Stop()
 			return
-		default:
+		case <-batchTick.C:
 			err := d.ProcessBatch(ctx, d.BatchSize())
 			switch {
 			case errors.Is(err, ErrNoWork):
-				{
-					mdw.logger.Info("no work. sleep", "daemon", d.Name())
-					time.Sleep(d.NoWorkSleep())
-				}
-			case err != nil:
-				mdw.logger.Error("error during batch processing", "error", err)
+				mdw.logger.Info("No work.Sleep", "daemon name", d.Name())
+				batchTick.Reset(d.NoWorkSleep())
+			default:
+				batchTick.Reset(d.BatchSleep())
 			}
-			mdw.logger.Debug("batch was processed. sleep")
-			time.Sleep(d.BatchSleep())
 		}
 	}
 }

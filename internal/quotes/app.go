@@ -1,8 +1,6 @@
 package quotes
 
 import (
-	"context"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -21,7 +19,6 @@ import (
 )
 
 func StartApp() {
-	fmt.Println(os.Getenv("ENV_DB_HOST"))
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./configs/")
@@ -74,20 +71,17 @@ func StartApp() {
 
 	client := currency.NewCurrencyQuotesClient(logger)
 
+	daemonWrapper := daemons.NewMultiDaemonWrapper(logger)
+	daemon := daemons.NewQuoteRefresherDaemon(&cfg.DaemonSettings.TaskRefresher, client, taskStorage, logger)
+	daemonWrapper.Register(daemon)
+
 	srv := server.NewQuotesServer(
 		&cfg.Server,
 		logger,
 		chi.NewRouter(),
 		service.NewQuotesService(logger, client, taskStorage, quoteStorage),
+		daemonWrapper,
 	)
-	daemonWrapper := daemons.NewMultiDaemonWrapper(logger)
-	daemon := daemons.NewQuoteRefresherDaemon(&cfg.DaemonSettings.TaskRefresher, client, taskStorage, logger)
-	daemonWrapper.Register(daemon)
-
-	go func() {
-		ctx := context.Background()
-		daemonWrapper.Start(ctx)
-	}()
 
 	srv.Start()
 }
