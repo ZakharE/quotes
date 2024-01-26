@@ -21,7 +21,7 @@ func NewTaskStorage(conn *sqlx.DB, logger *slog.Logger) *taskStorage {
 
 func (t taskStorage) Save(ctx context.Context, pair models.CurrencyPair) (int64, error) {
 	var id int64
-	err := t.conn.QueryRowContext(ctx, "INSERT INTO refresh_task(base, counter) VALUES($1, $2) RETURNING id;", pair.Base, pair.Counter).Scan(&id)
+	err := t.conn.QueryRowContext(ctx, "INSERT INTO refresh_task(base, counter, last_attempt_at) VALUES($1, $2, NOW()) RETURNING id;", pair.Base, pair.Counter).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("cannot create task: %w", errors.Join(models.ErrInsertErr, err))
 	}

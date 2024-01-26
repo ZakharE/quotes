@@ -7,6 +7,14 @@ Content-Type: application/json
   "counter": "uSD"
 }
 
+### Create task
+POST localhost:8080/quote/task
+Content-Type: application/json
+
+{
+  "base": "mxn",
+  "counter": "eur"
+}
 ### Get task by id
 GET localhost:8080/quote/task/1
 Content-Type: application/json

@@ -69,7 +69,7 @@ func (n notificationEventDaemon) ProcessBatch(ctx context.Context, batchSize int
 				n.logger.Error("Cannot save quote in database", "pair", pair, "error", err)
 			}
 
-			n.logger.Debug("Tasks was updated", "ids", ids)
+			n.logger.Info("Tasks was updated", "ids", ids)
 		}(pair, ids)
 	}
 	wg.Wait()

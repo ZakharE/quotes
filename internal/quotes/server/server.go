@@ -61,13 +61,18 @@ func (qs *quotesServer) Start() {
 	}
 
 	serverCtx := qs.gracefulShutdown()
-	qs.daemonsWrapper.Start(serverCtx)
+	daemonDone := make(chan struct{})
+	go func() {
+		qs.daemonsWrapper.Start(serverCtx)
+		daemonDone <- struct{}{}
+	}()
 	err = qs.srv.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		qs.logger.Warn("Some error occured during shutdown", "error", err)
 		os.Exit(1)
 	}
 	<-serverCtx.Done()
+	<-daemonDone
 
 	qs.logger.Info("Server was shut down")
 }
