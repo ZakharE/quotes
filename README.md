@@ -1,6 +1,11 @@
 # Prerequisites
 
-To run application you must have `Docker` installed.
+To run application you must have `Docker` and `Make` installed.
+For code generation, you need to download following tool
+
+```shell 
+go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0
+```
 
 # Used technologies
 
@@ -83,9 +88,13 @@ The logic is following:
 3. Request quotes from the client
 4. Update task status and data in the database. If the request was unsuccessful, set the tasks an `error` status.
 
+# Code generation
 
+To generate code for server and models run
 
-
+```shell
+make generate-all
+```
 
 
 
