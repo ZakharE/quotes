@@ -1,6 +1,6 @@
 # Prerequisites
 
-You should have `Docker` and `make` installed.
+To run application you must have `Docker` installed.
 
 # Used technologies
 
@@ -12,6 +12,7 @@ You should have `Docker` and `make` installed.
 
 # How to run
 
+## If you have Make installed
 Simply run
 
 ```shell
@@ -26,24 +27,37 @@ To stop application
 make app-stop
 ```
 
+## If you have only docker installed
+
+Run following command from project directory
+
+```shell
+docker-compose -f ./deployments/docker-compose.yml  up  --build -d
+```
+
+To stop the app run following from project directory
+
+```shell
+docker-compose -f ./deployments/docker-compose.yml  up  --build -d
+```
+
 # Available endpoints
 
 All endpoint described in `api/quotes/quotes.yaml` file.
 For GoLand users there is file with requests located at `requests/quotes.http`
 
-# App design
+# Refresh logic
 
 Async refresh happens in `quote_refresher` daemon.
 
 The logic is following:
 
-Collect all tasks in not `success` status within the batch.
+1. Collect all the tasks that are not in `success` and `last_update_attempt` was more than 1 minute ago.
+2. Aggregate tasks by currency pair.
+3. Request quotes from the client
+4. Update task status and data in the database. If the request was unsuccessful, set the tasks an `error` status.
 
-Then, aggregate tasks by currency pair.
 
-Next, request quotes from the client and save them in the database.
-
-If the request was unsuccessful, move the tasks to an `error` status.
 
 
 
