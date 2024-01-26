@@ -2,6 +2,7 @@ package quotes
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -16,9 +17,11 @@ import (
 	"plata_card_quotes/internal/quotes/db"
 	"plata_card_quotes/internal/quotes/server"
 	"plata_card_quotes/internal/quotes/service"
+	"strings"
 )
 
 func StartApp() {
+	fmt.Println(os.Getenv("ENV_DB_HOST"))
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./configs/")
@@ -29,18 +32,32 @@ func StartApp() {
 		os.Exit(1)
 	}
 
+	viper.SetEnvPrefix("ENV")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	err = viper.BindEnv("db.host", "DB_HOST")
+
+	if err != nil {
+		logger.Error("Cannot bind env var", "error", err)
+		os.Exit(1)
+	}
+
 	var cfg config.Config
 	err = viper.Unmarshal(&cfg)
+
 	if err != nil {
 		logger.Error("Cannot unmarshal config file", "error", err)
 		os.Exit(1)
 	}
 	// --- setup database
-	conn := sqlx.MustConnect("postgres", cfg.Db.ConnectionString())
+	connectionString := cfg.Db.ConnectionString()
+	conn := sqlx.MustConnect("postgres", connectionString)
 	currentWd, err := os.Getwd()
+
 	if err != nil {
 		return
 	}
+
 	fs := os.DirFS(path.Join(currentWd, "sql"))
 	goose.SetBaseFS(fs)
 

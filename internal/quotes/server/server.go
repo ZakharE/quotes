@@ -92,6 +92,12 @@ func (qs *quotesServer) RefreshQuote(ctx context.Context, request RefreshQuoteRe
 
 func (qs *quotesServer) GetLastQuote(ctx context.Context, request GetLastQuoteRequestObject) (GetLastQuoteResponseObject, error) {
 	pair := models.NewCurrencyPair(request.Params.BaseCurrency, request.Params.CounterCurrency)
+	if !models.IsCurrencySupported(pair.Base) {
+		return GetLastQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", pair.Base)}), nil
+	}
+	if !models.IsCurrencySupported(pair.Counter) {
+		return GetLastQuote400JSONResponse(models.Error{Message: fmt.Sprintf("Currency '%s' is not supported", pair.Counter)}), nil
+	}
 	quote, err := qs.quotesService.GetLastQuote(ctx, pair)
 	if errors.Is(err, models.ErrNoRows) {
 		return GetLastQuote404JSONResponse(models.Error{Message: "no quote with such currency pair"}), nil

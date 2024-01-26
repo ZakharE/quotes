@@ -37,6 +37,12 @@ paths:
             application/json:
               schema:
                 $ref: './models/models.yaml#/components/schemas/QuoteData'
+        '400':
+          description: returns if request contains unsupported currency
+          content:
+            application/json:
+              schema:
+                $ref: './models/models.yaml#/components/schemas/Error'
         '404':
           description: returns if no data available at the moment, i.e no refresh task were executed
           content:

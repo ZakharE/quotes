@@ -1,0 +1,26 @@
+version: '3'
+services:
+  quotes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - ENV_DB_HOST=postgres
+    command: [ "./quotes" ]
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=quotes_pass
+      - POSTGRES_USER=quotes_user
+      - POSTGRES_DB=quotes_db
+volumes:
+  postgres:
