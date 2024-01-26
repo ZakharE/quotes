@@ -14,7 +14,12 @@ To run application you must have `Docker` installed.
 
 Clone repo
 
+```shell 
+git@github.com:ZakharE/quotes.git
+```
+
 ## If you have Make installed
+
 Simply run
 
 ```shell
@@ -68,6 +73,7 @@ You need to create task first to be able to use endpoint `localhost:8080/quote?b
 Otherwise, status 404 will be return.
 
 ## Async refresh
+
 Async refresh happens in `quote_refresher` daemon.
 
 The logic is following:
